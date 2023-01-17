@@ -33,5 +33,16 @@ async def session(year,gp, session):
         return {"error": f"'{year}' is not a valid year"}
     return f1.getSession(year, gp, session)
 
+@app.get("/{year}/{gp}/{session}/{driver}")
+async def driver(year,gp,session,driver):
+    if "error" in f1.getDriver(driver).keys():
+        try: 
+            year = int(year)
+        except ValueError:
+            return {"error": f"'{year}' is not a valid year"}
+        f1.getSession(year, gp, session)
+        
+    return f1.getDriver(driver)
+
 if __name__ == "__main__":
     uvicorn.run(app)
