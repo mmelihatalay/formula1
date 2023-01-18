@@ -8,10 +8,17 @@ class Formula1():
     def __init__(self):
         fastf1.Cache.enable_cache("cache")
         self.session = None
+        self.localCache = {}
+
     def getSchedule(self, year: int):
 
         if type(year) is not int:
             return {"error": "year should be integer"}
+
+        keyVal = str(year)
+        if keyVal in self.localCache.keys():
+            return self.localCache[keyVal]
+        
         schedule = fastf1.get_event_schedule(year).to_dict()
         try:
             if len(schedule["RoundNumber"]) == 0:
@@ -25,7 +32,8 @@ class Formula1():
             for key in schedule.keys():
                 race[key] = schedule[key][i]
             races.append(race)
-
+        
+        self.localCache[keyVal] = races
         return races
 
     def getEvent(self, year: int, gp: str):
@@ -33,9 +41,14 @@ class Formula1():
             return {"error": "year should be integer"}
         if type(gp) is not str:
             return {"error": "GrandPrix should be string"}
+
+        keyVal = f"{year}_{gp}"
+        if keyVal in self.localCache.keys():
+            return self.localCache[keyVal]
+
         try:
             event = fastf1.get_event(year, gp).to_dict()
-            print(event)
+            self.localCache[keyVal] = event
             return event
         except KeyError:
             return {"error": f"year '{year}' is not available in API"}
@@ -50,7 +63,9 @@ class Formula1():
             return {"error": "GrandPrix should be string"}
         if type(ses) is not str:
             return {"error": "Session should be string"}
-        
+        keyVal = f"{year}_{gp}_{ses}"
+        if keyVal in self.localCache.keys():
+            return self.localCache[keyVal]
         try:
             self.session = fastf1.get_session(year, gp, ses)
             self.session.load()
@@ -69,11 +84,17 @@ class Formula1():
             for key in data.keys():
                 driver[key] = data[key][driverNo]
             drivers.append(driver)
+
+        self.localCache[keyVal] = drivers
         return drivers
 
-    def getDriver(self, driver: int or str):
+    def getDriver(self, year: int, gp:str, ses: str, driver: int or str):
+        keyVal = f"{year}_{gp}_{ses}_{driver}"
+        if keyVal in self.localCache.keys():
+            return self.localCache[keyVal]
+
         if self.session is None:
-            return {"error": "first load session /<year>/<gp>/<session>"}
+            _ = self.getSession(year,gp,ses)
 
 
         self.driverData = self.session.laps.pick_driver(driver)
@@ -85,7 +106,9 @@ class Formula1():
                 lap[key] = driverDataDict[key][lapNo]
             laps.append(lap)
 
-        return json.dumps(laps,cls=DateTimeEncoder)
+        laps =  json.dumps(laps,cls=DateTimeEncoder)
+        self.localCache[keyVal] = laps
+        return laps
     
 # subclass JSONEncoder
 class DateTimeEncoder(JSONEncoder):

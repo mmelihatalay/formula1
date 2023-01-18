@@ -1,9 +1,20 @@
 from fastapi import FastAPI
 from Formula1 import Formula1
 import uvicorn
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 f1 = Formula1()
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/")
 async def root():
@@ -35,14 +46,12 @@ async def session(year,gp, session):
 
 @app.get("/{year}/{gp}/{session}/{driver}")
 async def driver(year,gp,session,driver):
-    if "error" in f1.getDriver(driver).keys():
-        try: 
-            year = int(year)
-        except ValueError:
-            return {"error": f"'{year}' is not a valid year"}
-        f1.getSession(year, gp, session)
+    try: 
+        year = int(year)
+    except ValueError:
+        return {"error": f"'{year}' is not a valid year"}
         
-    return f1.getDriver(driver)
+    return f1.getDriver(year,gp,session,driver)
 
 if __name__ == "__main__":
-    uvicorn.run(app)
+    uvicorn.run(app,port=8000)
