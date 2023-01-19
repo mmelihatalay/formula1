@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
+from typing import List, Union, Optional
 from Formula1 import Formula1
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,23 +36,27 @@ async def event(year,gp):
     except ValueError:
         return {"error": f"'{year}' is not a valid year"}
     return f1.getEvent(year, gp)
-
+"""
 @app.get("/{year}/{gp}/{session}")
 async def session(year,gp, session):
     try: 
         year = int(year)
     except ValueError:
         return {"error": f"'{year}' is not a valid year"}
-    return f1.getSession(year, gp, session)
+    return f1.getSession(year, gp, session)"""
 
-@app.get("/{year}/{gp}/{session}/{driver}")
-async def driver(year,gp,session,driver):
+@app.get("/{year}/{gp}/{session}")
+async def session(year,gp,session,drivers: List[Union[int,str]] = Query(None)):
+    
     try: 
         year = int(year)
     except ValueError:
         return {"error": f"'{year}' is not a valid year"}
-        
-    return f1.getDriver(year,gp,session,driver)
+    
+    if not drivers:
+        return f1.getSession(year, gp, session)
+            
+    return f1.getDrivers(year,gp,session,drivers)
 
 if __name__ == "__main__":
     uvicorn.run(app,port=8000)

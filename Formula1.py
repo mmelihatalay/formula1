@@ -88,7 +88,13 @@ class Formula1():
         self.localCache[keyVal] = drivers
         return drivers
 
-    def getDriver(self, year: int, gp:str, ses: str, driver: int or str):
+    def getDrivers(self, year: int, gp:str, ses: str, drivers: list):
+        data = []
+        for driver in drivers:
+            data.append(self.getDriver(year,gp,ses,driver))
+        return data
+
+    def getDriver(self, year: int, gp:str, ses: str, driver: str or int):
         keyVal = f"{year}_{gp}_{ses}_{driver}"
         if keyVal in self.localCache.keys():
             return self.localCache[keyVal]
