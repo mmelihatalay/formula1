@@ -19,7 +19,9 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "Hello World"}
+    gg = f1.plot()
+    print(gg)
+    return gg
 
 @app.get("/{year}")
 async def schedule(year):
@@ -33,6 +35,7 @@ async def schedule(year):
 async def event(year,gp):
     try: 
         year = int(year)
+        gp = int(gp)
     except ValueError:
         return {"error": f"'{year}' is not a valid year"}
     return f1.getEvent(year, gp)
@@ -46,17 +49,33 @@ async def session(year,gp, session):
     return f1.getSession(year, gp, session)"""
 
 @app.get("/{year}/{gp}/{session}")
-async def session(year,gp,session,drivers: List[Union[int,str]] = Query(None)):
-    
+async def session(year,gp,session,drivers: List[Union[int,str]] = Query(None), fast = False, result = False):
+    if fast == True and result == True:
+        return {"error": "fastest lap and result cannot be requested at the same time"}
     try: 
         year = int(year)
+        gp = int(gp)
     except ValueError:
         return {"error": f"'{year}' is not a valid year"}
     
+    if result:
+        return f1.getResult(year, gp, session)
+    
     if not drivers:
         return f1.getSession(year, gp, session)
-            
-    return f1.getDrivers(year,gp,session,drivers)
+    
+    if fast:
+        return f1.getFastestLap(year,gp,session,drivers)      
+
+
+    _, driversDataDict = f1.getDrivers(year,gp,session,drivers)
+    return driversDataDict
+
+@app.get("/plot")
+async def plot():
+    gg = f1.plot()
+    print(gg)
+    return gg
 
 if __name__ == "__main__":
     uvicorn.run(app,port=8000)

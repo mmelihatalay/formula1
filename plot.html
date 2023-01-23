@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formula1</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bokeh/1.0.4/bokeh.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bokeh/1.0.4/bokeh-widgets.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bokeh/1.0.4/bokeh-tables.css">
+
+    <script>
+
+        async function getSchedule() {
+            const year = document.getElementById("year").value;
+            const api = `http://127.0.0.1:8000/${year}`;
+
+            let response = await fetch(api)
+            let item = await response.json()
+
+            f1Head = document.getElementById("f1-head");
+            f1Head.innerHTML = `F1 ${year} SCHEDULE`
+
+            gpList = document.getElementById("gp-list");
+            for (let i = 0; i < item.length; i++) {
+                if (item[i].EventFormat != "testing") {
+                    let element = document.createElement("option");
+                    element.setAttribute("value", `${item[i].RoundNumber}`);
+                    element.innerHTML = `${item[i].RoundNumber} - ${item[i].OfficialEventName}`;
+                    gpList.appendChild(element);
+                }
+
+                //element.innerHTML = `${i + 1}.\t${item[i].DriverNumber}\t${item[i].Abbreviation}\t${item[i].TeamName}`
+                //resultDiv.appendChild(element)
+            }
+
+        }
+
+        async function getRace() {
+            const year = document.getElementById("year").value;
+            const race = document.getElementById("gp-list").value;
+            const api = `http://127.0.0.1:8000/${year}/${race}`;
+
+            let response = await fetch(api)
+            let item = await response.json()
+            let gpSessions = document.getElementById("gp");
+            const sessions = ["Q", "R"]
+            const longName = ["Qualifications", "Race"]
+            for (let i = 0; i < sessions.length; i++) {
+                let element = document.createElement("input");
+                element.setAttribute("type", "radio")
+                element.setAttribute("id", `${sessions[i]}`)
+                element.setAttribute("name", "radioGroup")
+                element.setAttribute("value", `${sessions[i]}`)
+                element.setAttribute("class", "sessions")
+                gpSessions.appendChild(element)
+                element = document.createElement("label")
+                element.setAttribute("for", `${sessions[i]}`)
+                element.innerHTML = longName[i]
+                gpSessions.appendChild(element)
+            }
+            element = document.createElement("button");
+            element.setAttribute("onclick", "getResult()");
+            element.innerHTML = "Results";
+            gpSessions.appendChild(element);
+
+        }
+
+        async function getPlot() {
+            let year = document.getElementById("year").value
+            const race = document.getElementById("gp-list").value;
+            const session = document.querySelectorAll('.sessions:checked')[0].value;
+            let drivers = document.querySelectorAll('.drivers:checked');
+            driverQuery = ""
+            drivers.forEach(driver => driverQuery += `drivers=${driver.value}&`);
+            api = `http://127.0.0.1:8000/${year}/${race}/${session}?${driverQuery}fast=True`
+            const response = await fetch(api)
+            const item = await response.json()
+
+            Bokeh.embed.embed_item(item, "myplot")
+        }
+
+        async function getResult() {
+            const year = document.getElementById("year").value;
+            const race = document.getElementById("gp-list").value;
+            const session = document.querySelectorAll('.sessions:checked')[0].value;
+            const api = `http://127.0.0.1:8000/${year}/${race}/${session}?result=True`;
+
+            const response = await fetch(api);
+            const item = await response.json();
+            resultDiv = document.getElementById("result");
+            for (let i = 0; i < item.length; i++) {
+                let element = document.createElement("input")
+                element.setAttribute("type", "checkbox")
+                element.setAttribute("class", "drivers")
+                element.setAttribute("id", `${item[i].Abbreviation}`)
+                element.setAttribute("name", `${item[i].Abbreviation}`)
+                element.setAttribute("value", `${item[i].Abbreviation}`)
+                resultDiv.appendChild(element)
+                element = document.createElement("label")
+                element.setAttribute("for", `${item[i].Abbreviation}`)
+                element.innerHTML = `${i + 1}.\t${item[i].DriverNumber}\t${item[i].Abbreviation}\t${item[i].TeamName}`
+                resultDiv.appendChild(element)
+                element = document.createElement("br")
+                resultDiv.appendChild(element)
+                //element.innerHTML = `${i + 1}.\t${item[i].DriverNumber}\t${item[i].Abbreviation}\t${item[i].TeamName}`
+                //resultDiv.appendChild(element)
+            }
+            element = document.createElement("button");
+            element.setAttribute("onclick", "getPlot()");
+            element.innerHTML = "PLOT"
+            resultDiv.appendChild(element)
+
+        }
+
+    </script>
+</head>
+
+<body>
+    <form id="yearForm" onsubmit="return false">
+        <label for="year">Year</label>
+        <input type="text" id="year" name="year">
+        <input type="submit" onclick="getSchedule()">
+    </form>
+    <div id="div-schedule">
+        <h1 id="f1-head">F1 SCHEDULE</h1>
+        <label for="gp-list"></label>
+
+        <select name="gp-list" id="gp-list">
+            <option value="" disabled selected>Select GP</option>
+        </select>
+        <button onclick="getRace()">Bring</button>
+    </div>
+    <div id="gp">
+    </div>
+    <div id="result">
+    </div>
+    <div id="myplot"></div>
+
+
+
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-3.0.3.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-widgets-3.0.3.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-tables-3.0.3.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-gl-3.0.3.min.js"></script>
+    <script src="https://cdn.bokeh.org/bokeh/release/bokeh-mathjax-3.0.3.min.js"></script>
+</body>
+
+</html>

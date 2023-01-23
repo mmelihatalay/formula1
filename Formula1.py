@@ -36,11 +36,11 @@ class Formula1():
         self.localCache[keyVal] = races
         return races
 
-    def getEvent(self, year: int, gp: str):
+    def getEvent(self, year: int, gp):
         if type(year) is not int:
             return {"error": "year should be integer"}
-        if type(gp) is not str:
-            return {"error": "GrandPrix should be string"}
+        #if type(gp) is not str:
+        #    return {"error": "GrandPrix should be string"}
 
         keyVal = f"{year}_{gp}"
         if keyVal in self.localCache.keys():
@@ -48,21 +48,19 @@ class Formula1():
 
         try:
             event = fastf1.get_event(year, gp).to_dict()
+            event = json.dumps(event,cls=DateTimeEncoder)
             self.localCache[keyVal] = event
             return event
         except KeyError:
             return {"error": f"year '{year}' is not available in API"}
-        except ValueError:
-            return {"error": f"'{gp}' GrandPrix is not available in API"}
         
 
-    def getSession(self, year: int, gp:str, ses: str):
+    def getSession(self, year: int, gp:int, ses: str):
         if type(year) is not int:
             return {"error": "year should be integer"}
-        if type(gp) is not str:
-            return {"error": "GrandPrix should be string"}
         if type(ses) is not str:
             return {"error": "Session should be string"}
+        print(type(gp))
         keyVal = f"{year}_{gp}_{ses}"
         if keyVal in self.localCache.keys():
             return self.localCache[keyVal]
@@ -72,8 +70,6 @@ class Formula1():
             
         except KeyError:
             return {"error": f"year '{year}' is not available in API"}
-        except ValueError:
-            return {"error": f"'{gp}' GrandPrix is not available in API"}
         except ValueError:
             return {"error": f"Session '{ses}' is not available in API"}
         
@@ -89,10 +85,11 @@ class Formula1():
         return drivers
 
     def getDrivers(self, year: int, gp:str, ses: str, drivers: list):
-        data = []
+        dataDrivers = {}
+        dataDriversDict = {}
         for driver in drivers:
-            data.append(self.getDriver(year,gp,ses,driver))
-        return data
+            dataDrivers[driver], dataDriversDict[driver] = self.getDriver(year,gp,ses,driver)
+        return dataDrivers, dataDriversDict
 
     def getDriver(self, year: int, gp:str, ses: str, driver: str or int):
         keyVal = f"{year}_{gp}_{ses}_{driver}"
@@ -103,19 +100,65 @@ class Formula1():
             _ = self.getSession(year,gp,ses)
 
 
-        self.driverData = self.session.laps.pick_driver(driver)
-        driverDataDict = self.driverData.to_dict()
-        laps = []
-        for lapNo in driverDataDict["LapNumber"].keys():
-            lap = {}
-            for key in driverDataDict.keys():
-                lap[key] = driverDataDict[key][lapNo]
-            laps.append(lap)
+        driverData = self.session.laps.pick_driver(driver)
+        driverDataJson =  json.dumps(driverData,cls=DateTimeEncoder)
+        return driverData, driverDataJson
+        
 
-        laps =  json.dumps(laps,cls=DateTimeEncoder)
-        self.localCache[keyVal] = laps
-        return laps
+    def getFastestLap(self, year: int, gp:str, ses: str, drivers: list):
+        keyVal = f"{year}_{gp}_{ses}"
+        if keyVal not in self.localCache.keys():
+            self.getSession(year, gp, ses)
+        
+        driversData, _ = self.getDrivers(year, gp, ses, drivers)
+        
+        driversDict = {}
+        for driver in drivers:
+            fastData = driversData[driver].pick_fastest()
+            carData = fastData.get_car_data().add_distance()
+            driversDict[driver] = carData
+        self.plotDriver = driversDict
+        bokehJson = self.plot()
+        return bokehJson
+
+    def plot(self):
+        from bokeh.embed import json_item
+        from bokeh.plotting import figure
+        from bokeh.resources import CDN
+        from bokeh.palettes import Dark2_5 as palette
+        import itertools  
+        colors = itertools.cycle(palette)    
+        p = figure(title="Race", x_axis_label="Distance [m]", y_axis_label="Speed [km/h]",width=1500, height=500)
+        for driver,color in zip(self.plotDriver.keys(), colors):
+            p.line(self.plotDriver[driver]["Distance"], self.plotDriver[driver]["Speed"],
+                    color=color,
+                    legend_label=driver,
+                    line_width=2)
+        bokehJson = json_item(p,"myplot")
+        return bokehJson
     
+    def getResult(self, year: int, gp:str, ses: str):
+        if type(year) is not int:
+            return {"error": "year should be integer"}
+        if type(ses) is not str:
+            return {"error": "Session should be string"}
+        try:
+            self.session = fastf1.get_session(year, gp, ses)
+            self.session.load()
+        except KeyError:
+            return {"error": f"year '{year}' is not available in API"}
+        except ValueError:
+            return {"error": f"Session '{ses}' is not available in API"}
+        
+        resultDict = self.session.results.to_dict()
+        results = []
+        for i,num in enumerate(resultDict['DriverNumber']):
+            result = {}
+            for key in resultDict.keys():
+                result[key] = resultDict[key][num]
+            results.append(result)
+        return results
+
 # subclass JSONEncoder
 class DateTimeEncoder(JSONEncoder):
         #Override the default method
@@ -126,9 +169,10 @@ class DateTimeEncoder(JSONEncoder):
 if __name__ == "__main__":
     f1 = Formula1()
     #schedule = f1.getSchedule(2022)
-    #event = f1.getEvent(2022, "French")
-    session = f1.getSession(2022, "French", "R")
-    driver = f1.getDriver("VET")
-    print(driver)
+    event = f1.getEvent(2021,1)
+    #session = f1.getSession(2022, "French", "R")
+    #driver = f1.getDriver(2022, "French", "R",["LEC"])
+    #gg = f1.getTelemetry()
+    print(event)
 
 
