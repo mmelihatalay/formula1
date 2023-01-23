@@ -15,6 +15,8 @@ This project has three layers.
   
   this module requires fastAPI and uvicorn modules and ıt runs server with some certain end points.
   
+  to run:
+  
   python Server.py
 ```
 
@@ -23,4 +25,5 @@ This project has three layers.
   plot.html
   
   stand alone html file which fetchs data from the Server.py
+  
 ```
