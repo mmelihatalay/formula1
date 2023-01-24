@@ -9,7 +9,92 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bokeh/1.0.4/bokeh.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bokeh/1.0.4/bokeh-widgets.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bokeh/1.0.4/bokeh-tables.css">
+    <style>
+        /* Form container */
+form {
+    width: 300px;
+    margin: 50px auto;
+    text-align: center;
+}
 
+/* Search box */
+.search-box {
+    width: 80%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: 0.3s;
+}
+/* Search box focus effect */
+.search-box:focus {
+    border: 2px solid #555;
+}
+
+/* Search button */
+.search-button {
+    width: 100px; /* adjust as needed */
+    height: 40px;
+    background-color: #333;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+/* Search button hover effect */
+.search-button:hover {
+    background-color: #45a049;
+}
+
+h1 {
+    font-size: 36px;
+    text-align: center;
+    color: #333;
+    text-shadow: 2px 2px 4px #ccc;
+    margin-top: 50px;
+}
+
+/* Dropdown container */
+.dropdown {
+    width: 300px;
+    margin: 50px auto;
+    text-align: center;
+    position: relative;
+}
+
+/* Dropdown button */
+.dropdown-button {
+    width: 80%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    box-sizing: border-box;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: #fff;
+    color: #333;
+    transition: all 0.3s ease-in-out;
+    text-align: left;
+}
+
+/* Dropdown button hover effect */
+.dropdown-button:hover {
+    background-color: #f2f2f2;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+
+/* Dropdown button focus effect */
+.dropdown-button:focus {
+    background-color: #f2f2f2;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    outline: none;
+}
+
+    </style>
     <script>
 
         async function getSchedule() {
@@ -167,18 +252,17 @@
 
 <body>
     <form id="yearForm" onsubmit="return false">
-        <label for="year">Year</label>
-        <input type="text" id="year" name="year">
-        <input type="submit" onclick="getSchedule()">
+        <input type="text" id="year" name="year" placeholder="Year" class="search-box">
+        <input type="submit" onclick="getSchedule()" class="search-button">
     </form>
     <div id="div-schedule">
         <h1 id="f1-head">F1 SCHEDULE</h1>
         <label for="gp-list"></label>
 
-        <select name="gp-list" id="gp-list">
+        <select name="gp-list" id="gp-list" class="dropdown">
             <option value="" disabled selected>Select GP</option>
         </select>
-        <button onclick="getRace()">Bring</button>
+        <button onclick="getRace()" class="dropdown-button">Bring</button>
     </div>
     <div id="gp">
     </div>
