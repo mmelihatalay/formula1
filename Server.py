@@ -49,7 +49,7 @@ async def session(year,gp, session):
     return f1.getSession(year, gp, session)"""
 
 @app.get("/{year}/{gp}/{session}")
-async def session(year,gp,session,drivers: List[Union[int,str]] = Query(None), fast = False, result = False):
+async def session(year,gp,session,drivers: List[Union[int,str]] = Query(None), fast = False, result = False, track = False):
     if fast == True and result == True:
         return {"error": "fastest lap and result cannot be requested at the same time"}
     try: 
@@ -64,10 +64,9 @@ async def session(year,gp,session,drivers: List[Union[int,str]] = Query(None), f
     if not drivers:
         return f1.getSession(year, gp, session)
     
-    if fast:
-        return f1.getFastestLap(year,gp,session,drivers)      
-
-
+    if fast or track:
+        return f1.getFastestLap(year,gp,session,drivers, fast, track)
+    
     _, driversDataDict = f1.getDrivers(year,gp,session,drivers)
     return driversDataDict
 

@@ -67,6 +67,30 @@
 
         }
 
+        async function getTrack() {
+            let year = document.getElementById("year").value
+            const race = document.getElementById("gp-list").value;
+            const session = document.querySelectorAll('.sessions:checked')[0].value;
+            let drivers = document.querySelectorAll('.drivers:checked');
+            driverQuery = ""
+            drivers.forEach(driver => driverQuery += `drivers=${driver.value}&`);
+            api = `http://127.0.0.1:8000/${year}/${race}/${session}?${driverQuery}track=True`
+            const response = await fetch(api)
+            const item = await response.json()
+            myplotDiv = document.getElementById("myplot");
+            for (let i = 0; i < item.length; i++) {
+                
+                let element = document.createElement("div");
+                
+                element.setAttribute("id",`myplot${i}`)
+                element.setAttribute("style","text-align:center;")
+                element.innerHTML = drivers[i].value
+                myplotDiv.appendChild(element)
+
+            Bokeh.embed.embed_item(item[i], `myplot${i}`)
+        }
+        }
+
         async function getPlot() {
             let year = document.getElementById("year").value
             const race = document.getElementById("gp-list").value;
@@ -110,6 +134,10 @@
             element = document.createElement("button");
             element.setAttribute("onclick", "getPlot()");
             element.innerHTML = "PLOT"
+            resultDiv.appendChild(element)
+            element = document.createElement("button");
+            element.setAttribute("onclick", "getTrack()");
+            element.innerHTML = "TRACK"
             resultDiv.appendChild(element)
 
         }

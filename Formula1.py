@@ -2,6 +2,17 @@ import fastf1
 import json
 import datetime
 from json import JSONEncoder
+from bokeh.embed import json_item
+from bokeh.plotting import figure
+from bokeh.resources import CDN
+from bokeh.palettes import Dark2_5 as palette
+import itertools  
+import numpy as np
+from bokeh.models import BasicTicker, ColorBar, LinearColorMapper, PrintfTickFormatter
+from bokeh.plotting import figure, show
+from bokeh.layouts import row, gridplot 
+import pandas as pd
+import math
 
 class Formula1():
 
@@ -105,7 +116,7 @@ class Formula1():
         return driverData, driverDataJson
         
 
-    def getFastestLap(self, year: int, gp:str, ses: str, drivers: list):
+    def getFastestLap(self, year: int, gp:str, ses: str, drivers: list, fast, track):
         keyVal = f"{year}_{gp}_{ses}"
         if keyVal not in self.localCache.keys():
             self.getSession(year, gp, ses)
@@ -115,18 +126,44 @@ class Formula1():
         driversDict = {}
         for driver in drivers:
             fastData = driversData[driver].pick_fastest()
-            carData = fastData.get_car_data().add_distance()
+            carData = fastData.get_telemetry().add_distance()
             driversDict[driver] = carData
         self.plotDriver = driversDict
-        bokehJson = self.plot()
-        return bokehJson
+        if fast:
+            return self.plot()
+        if track:
+            return self.plotTrack()
+
+    def plotTrack(self):
+        tracksDriver = []
+        colors = ["#4575b4", "#74add1", "#abd9e9", "#e0f3f8", "#ffffbf", "#fee090", "#fdae61", "#f46d43", "#d73027"]
+        heatKeys = ["Speed", "nGear","Brake", "Throttle"]
+        for j,driver in enumerate(self.plotDriver.keys()):
+            plots = []
+            for i, heatKey in enumerate(heatKeys):
+                heatValue = np.array(self.plotDriver[driver][heatKey]).astype(float)
+                x = np.array(self.plotDriver[driver]["X"]).astype(float)
+                y = np.array(self.plotDriver[driver]["Y"]).astype(float)
+                heatDict = {"x":x,"y":y,"heatValue":heatValue}
+                mapper = LinearColorMapper(palette=colors, low=min(0,heatValue.min().astype(int)), high=heatValue.max().astype(int))
+                if i == 0:
+                    p = figure(width=350, height=250)
+                else:
+                    p = figure(width=350, height=250,x_range=plots[0].x_range, y_range=plots[0].y_range)
+                p.circle(x="x",y="y",source=heatDict,fill_color={'field': "heatValue", 'transform': mapper},line_color=None)
+                color_bar = ColorBar(color_mapper=mapper, major_label_text_font_size="7px",
+                     ticker=BasicTicker(desired_num_ticks=len(colors)),
+                     formatter=PrintfTickFormatter(format="%d"),
+                     label_standoff=6, border_line_color=None, title=heatKey)
+                p.xaxis.major_label_orientation = math.pi/2
+                p.add_layout(color_bar, 'right')
+                plots.append(p)
+            
+            tracksDriver.append(json_item(gridplot([plots],toolbar_location="below"),f"myplot{j}"))
+        
+        return tracksDriver
 
     def plot(self):
-        from bokeh.embed import json_item
-        from bokeh.plotting import figure
-        from bokeh.resources import CDN
-        from bokeh.palettes import Dark2_5 as palette
-        import itertools  
         colors = itertools.cycle(palette)    
         p = figure(title="Race", x_axis_label="Distance [m]", y_axis_label="Speed [km/h]",width=1500, height=500)
         for driver,color in zip(self.plotDriver.keys(), colors):
