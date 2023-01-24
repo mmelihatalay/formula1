@@ -13,6 +13,7 @@
     <script>
 
         async function getSchedule() {
+            resetOnBring()
             const year = document.getElementById("year").value;
             const api = `http://127.0.0.1:8000/${year}`;
 
@@ -140,6 +141,25 @@
             element.innerHTML = "TRACK"
             resultDiv.appendChild(element)
 
+        }
+
+        function resetOnBring(){
+            gpDiv = document.getElementById("gp")
+            gpDiv.innerHTML = ""
+
+            gpDiv = document.getElementById("result")
+            gpDiv.innerHTML = ""
+
+            gpDiv = document.getElementById("myplot")
+            gpDiv.innerHTML = ""
+
+            options = document.getElementsByTagName("option")
+            const lengthOpt = options.length
+            for (let i = 1; i < lengthOpt; i++) {
+                options[1].remove()
+            }
+
+            
         }
 
     </script>
