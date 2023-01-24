@@ -10,90 +10,168 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bokeh/1.0.4/bokeh-widgets.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bokeh/1.0.4/bokeh-tables.css">
     <style>
-        /* Form container */
-form {
-    width: 300px;
-    margin: 50px auto;
-    text-align: center;
-}
+        /* Form styling */
+        #yearForm {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 50px;
+        }
 
-/* Search box */
-.search-box {
-    width: 80%;
-    padding: 12px 20px;
-    margin: 8px 0;
-    box-sizing: border-box;
-    border: 2px solid #ccc;
-    border-radius: 4px;
-    font-size: 16px;
-    transition: 0.3s;
-}
-/* Search box focus effect */
-.search-box:focus {
-    border: 2px solid #555;
-}
+        .search-box {
+            padding: 12px 20px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+        }
 
-/* Search button */
-.search-button {
-    width: 100px; /* adjust as needed */
-    height: 40px;
-    background-color: #333;
-    color: #fff;
-    border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-/* Search button hover effect */
-.search-button:hover {
-    background-color: #45a049;
-}
+        .search-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
 
-h1 {
-    font-size: 36px;
-    text-align: center;
-    color: #333;
-    text-shadow: 2px 2px 4px #ccc;
-    margin-top: 50px;
-}
+        .search-button:hover {
+            background-color: #45a049;
+        }
 
-/* Dropdown container */
-.dropdown {
-    width: 300px;
-    margin: 50px auto;
-    text-align: center;
-    position: relative;
-}
+        /* Schedule styling */
+        #div-schedule {
+            text-align: center;
+            margin-top: 50px;
+        }
 
-/* Dropdown button */
-.dropdown-button {
-    width: 80%;
-    padding: 12px 20px;
-    margin: 8px 0;
-    box-sizing: border-box;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    background-color: #fff;
-    color: #333;
-    transition: all 0.3s ease-in-out;
-    text-align: left;
-}
+        #f1-head {
+            font-weight: bold;
+            font-size: 30px;
+        }
 
-/* Dropdown button hover effect */
-.dropdown-button:hover {
-    background-color: #f2f2f2;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-}
+        /* Dropdown styling */
+        .dropdown {
+            padding: 16px;
+            border: none;
+            border-radius: 4px;
+            background-color: #f1f1f1;
+        }
 
-/* Dropdown button focus effect */
-.dropdown-button:focus {
-    background-color: #f2f2f2;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    outline: none;
-}
+        .dropdown-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
 
+        .dropdown-button:hover {
+            background-color: #45a049;
+        }
+
+        /* GP and result styling */
+        #gp,
+        #result {
+            margin-top: 50px;
+            text-align: center;
+        }
+
+        #myplot {
+            margin-top: 50px;
+        }
+
+
+
+        /* Button styling */
+        .custom-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 14px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .custom-button:hover {
+            background-color: #45a049;
+        }
+
+        /* Checkbox styling */
+        .drivers {
+            align-items: center;
+            margin: 8px 0;
+            position: relative;
+        }
+
+        .drivers input[type=checkbox] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        /* Styling the checkbox label */
+        .drivers label {
+            margin-left: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* Styling the checkmark */
+        .drivers .checkmark {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 20px;
+            width: 20px;
+            background-color: #eee;
+            border-radius: 3px;
+        }
+
+        /* On mouse-over, add a grey background color */
+        .drivers:hover input~.checkmark {
+            background-color: #ccc;
+        }
+
+        /* When the checkbox is checked, add a blue background */
+        .drivers input:checked~.checkmark {
+            background-color: #2196F3;
+        }
+
+        /* Create the checkmark/indicator (hidden when not checked) */
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+        }
+
+        /* Show the checkmark when checked */
+        .drivers input:checked~.checkmark:after {
+            display: block;
+        }
+
+        /* Style the checkmark/indicator */
+        .drivers .checkmark:after {
+            left: 7px;
+            top: 2px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 3px 3px 0;
+            -webkit-transform: rotate(45deg);
+            -ms-transform: rotate(45deg);
+            transform: rotate(45deg);
+        }
+
+        .plot {
+            align-items: center;
+        }
     </style>
     <script>
 
@@ -148,6 +226,7 @@ h1 {
             }
             element = document.createElement("button");
             element.setAttribute("onclick", "getResult()");
+            element.setAttribute("class", "custom-button");
             element.innerHTML = "Results";
             gpSessions.appendChild(element);
 
@@ -165,16 +244,18 @@ h1 {
             const item = await response.json()
             myplotDiv = document.getElementById("myplot");
             for (let i = 0; i < item.length; i++) {
-                
+
                 let element = document.createElement("div");
-                
-                element.setAttribute("id",`myplot${i}`)
-                element.setAttribute("style","text-align:center;")
+
+                element.setAttribute("id", `myplot${i}`)
+                element.setAttribute("style", "text-align:center;")
+                element.setAttribute("class", "plot")
+
                 element.innerHTML = drivers[i].value
                 myplotDiv.appendChild(element)
 
-            Bokeh.embed.embed_item(item[i], `myplot${i}`)
-        }
+                Bokeh.embed.embed_item(item[i], `myplot${i}`)
+            }
         }
 
         async function getPlot() {
@@ -203,7 +284,7 @@ h1 {
             for (let i = 0; i < item.length; i++) {
                 let element = document.createElement("input")
                 element.setAttribute("type", "checkbox")
-                element.setAttribute("class", "drivers")
+                element.setAttribute("class", "drivers checkmark")
                 element.setAttribute("id", `${item[i].Abbreviation}`)
                 element.setAttribute("name", `${item[i].Abbreviation}`)
                 element.setAttribute("value", `${item[i].Abbreviation}`)
@@ -219,16 +300,18 @@ h1 {
             }
             element = document.createElement("button");
             element.setAttribute("onclick", "getPlot()");
+            element.setAttribute("class", "custom-button");
             element.innerHTML = "PLOT"
             resultDiv.appendChild(element)
             element = document.createElement("button");
             element.setAttribute("onclick", "getTrack()");
+            element.setAttribute("class", "custom-button");
             element.innerHTML = "TRACK"
             resultDiv.appendChild(element)
 
         }
 
-        function resetOnBring(){
+        function resetOnBring() {
             gpDiv = document.getElementById("gp")
             gpDiv.innerHTML = ""
 
@@ -244,7 +327,7 @@ h1 {
                 options[1].remove()
             }
 
-            
+
         }
 
     </script>
@@ -256,7 +339,7 @@ h1 {
         <input type="submit" onclick="getSchedule()" class="search-button">
     </form>
     <div id="div-schedule">
-        <h1 id="f1-head">F1 SCHEDULE</h1>
+        <h1 id="f1-head">F1 SCHEDULE</h1><br>
         <label for="gp-list"></label>
 
         <select name="gp-list" id="gp-list" class="dropdown">
@@ -268,7 +351,7 @@ h1 {
     </div>
     <div id="result">
     </div>
-    <div id="myplot"></div>
+    <div id="myplot" class="plot"></div>
 
 
 
