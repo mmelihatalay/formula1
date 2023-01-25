@@ -13,6 +13,7 @@ from bokeh.plotting import figure, show
 from bokeh.layouts import row, gridplot 
 import pandas as pd
 import math
+import fastf1.plotting
 
 class Formula1():
 
@@ -164,7 +165,7 @@ class Formula1():
         return tracksDriver
 
     def plot(self):
-        colors = itertools.cycle(palette)    
+        colors = itertools.cycle(palette)
         p = figure(title="Race", x_axis_label="Distance [m]", y_axis_label="Speed [km/h]",width=1500, height=500)
         for driver,color in zip(self.plotDriver.keys(), colors):
             p.line(self.plotDriver[driver]["Distance"], self.plotDriver[driver]["Speed"],
